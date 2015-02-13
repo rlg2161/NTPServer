@@ -1,26 +1,16 @@
 var EE = require('events').EventEmitter;
 var util = require('util');
 
+/*var numCustomers = 1;
+if (process.argv[2] != null){
+  numCustomers = process.argv[2];
+}*/
+
 
 function producer() {
 
   this.consumerList = [];
 
-  this.pEmitter = new producerEmitter();
-  this.pListener = new producerListener(this.consumerList);
-
-  
-}
-
-
-function consumer() {
-
-  this.cEmitter = new consumerEmitter();
-  this.cListener = new consumerListener(producer);
-}
-
-
-var producerEmitter = function(){
   EE.call(this);
 
   this.time = function(){
@@ -28,21 +18,23 @@ var producerEmitter = function(){
     this.emit('time', date);
   }
 
-};
 
-var producerListener = function(consumerList){
-
-  this.registerHandler = function(consumerList){
-    consumerList.append(10);
+  this.registerHandler = function(){
+    console.log('someone registered');
+    setTimeout(function(){
+      producer.pEmitter.removeListener('time', customer1.timeHandler);
+    }, 10000);
   }
 
   this.keepAliveHandler = function(consumerList){
     consumerList[0] = 10;
   }
 
+  
 }
 
-var consumerEmitter = function(){
+
+function consumer(producer) {
 
   this.register = function(){
     this.emit('register');
@@ -51,19 +43,17 @@ var consumerEmitter = function(){
   this.keepAlive = function(){
     this.emit('keepAlive');
   }
-}
-
-
-
-var consumerListener = function(){
 
   this.timeHandler = function(date){
     console.log(date);
   }
+
 }
 
-util.inherits(producerEmitter, EE);
-util.inherits(consumerEmitter, EE);
+
+
+util.inherits(producer, EE);
+util.inherits(consumer, EE);
 
 var iID = null;
 var tID = null;
@@ -86,15 +76,20 @@ function resetProcess(){
 }
 
 var producer = new producer();
-var consumer = new consumer(producer)
+var consumer1 = new consumer(producer);
 
-producer.pEmitter.on('time', consumer.cListener.timeHandler);
-//consumer.on('register', producer.)
 
-beginProcess();
+consumer1.on('register', producer.registerHandler);
+producer.on('time', consumer1.timeHandler);
+
+console.log(producer.listeners('time'));
+
+consumer1.register();
+
+/*beginProcess();
 setTimeout(function(){
   console.log("timer reset");
   resetProcess();
 }, 5000);
-
+*/
 
