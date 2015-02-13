@@ -9,8 +9,7 @@ if (process.argv[2] != null){
 
 function producer() {
 
-  this.consumerList = [];
-
+  
   EE.call(this);
 
   this.time = function(){
@@ -19,15 +18,19 @@ function producer() {
   }
 
 
-  this.registerHandler = function(){
+  this.registerHandler = function(cons){
     console.log('someone registered');
-    setTimeout(function(){
-      producer.pEmitter.removeListener('time', customer1.timeHandler);
+    var timeoutID = setTimeout(function(){
+      producer.removeListener('time', cons.timeHandler);
+      console.log('someone left');
+      console.log(producer.listeners('time'));
     }, 10000);
   }
 
-  this.keepAliveHandler = function(consumerList){
-    consumerList[0] = 10;
+  this.keepAliveHandler = function(cons){
+    console.log('someone kept alive');
+    producer.removeListener('time', cons.timeHandler);
+    producer.on('time', cons.timeHandler);
   }
 
   
@@ -36,12 +39,14 @@ function producer() {
 
 function consumer(producer) {
 
+  EE.call(this);
+
   this.register = function(){
-    this.emit('register');
+    this.emit('register', this);
   }
 
   this.keepAlive = function(){
-    this.emit('keepAlive');
+    this.emit('keepAlive', this);
   }
 
   this.timeHandler = function(date){
@@ -50,8 +55,6 @@ function consumer(producer) {
 
 }
 
-
-
 util.inherits(producer, EE);
 util.inherits(consumer, EE);
 
@@ -59,9 +62,9 @@ var iID = null;
 var tID = null;
 
 function beginProcess(){
-  producer.pEmitter.time();
+  producer.time();
   iID = setInterval(function(){
-    producer.pEmitter.time();
+    producer.time();
   }, 1000);
 
   tID = setTimeout(function(){
@@ -85,6 +88,13 @@ producer.on('time', consumer1.timeHandler);
 console.log(producer.listeners('time'));
 
 consumer1.register();
+
+producer.time();
+iID = setInterval(function(){
+  if (producer.listeners('time').length > 0){
+    producer.time();
+  }
+}, 1000);
 
 /*beginProcess();
 setTimeout(function(){
