@@ -6,9 +6,7 @@ if (process.argv[2] != null){
   numCustomers = process.argv[2];
 }*/
 
-
 function producer() {
-
   
   EE.call(this);
 
@@ -29,17 +27,12 @@ function producer() {
   }
 
   this.keepAliveHandler = function(cons){
-    //console.log('someone kept alive');
-    //producer.removeListener('time', cons.timeHandler);
-    //producer.on('time', cons.timeHandler);
-
     clearTimeout(cons.timeoutID)
     cons.timeoutID = setTimeout(function(){
       producer.removeListener('time', cons.timeHandler);
       console.log('someone left');
       console.log(producer.listeners('time'));
     }, 10000)
-
   }
 
   
@@ -48,7 +41,7 @@ function producer() {
 
 function consumer(n) {
 
-  EE.call(this);
+  //EE.call(this);
   this.name = n;
   this.timeoutID = null;
 
@@ -110,7 +103,7 @@ consumer1.register();
 consumer2.register();
 
 var i = 0;
-numIter = 3;
+numIter = 1;
 iID = setInterval(function(){
   
   if (i < numIter){
@@ -127,9 +120,15 @@ iID = setInterval(function(){
 }, 5000);
 
 producer.time();
-iID = setInterval(function(){
+piID = setInterval(function(){
   if (producer.listeners('time').length > 0){
     producer.time();
+  }
+  else {
+    console.log("No more time listeners");
+    producer.removeAllListeners();
+    clearInterval(piID);
+    clearInterval(iID);
   }
 }, 1000);
 
