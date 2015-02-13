@@ -1,10 +1,7 @@
 var EE = require('events').EventEmitter;
 var util = require('util');
+var childProcess = require('child_process');
 
-/*var numCustomers = 1;
-if (process.argv[2] != null){
-  numCustomers = process.argv[2];
-}*/
 
 function producer() {
   
@@ -17,11 +14,11 @@ function producer() {
 
 
   this.registerHandler = function(cons){
-    console.log('someone registered');
+    //console.log('someone registered');
     cons.timeoutID = setTimeout(function(){
       producer.removeListener('time', cons.timeHandler);
-      console.log('someone left');
-      console.log(producer.listeners('time'));
+      //console.log('someone left');
+      //console.log(producer.listeners('time'));
     }, 10000);
 
   }
@@ -30,12 +27,10 @@ function producer() {
     clearTimeout(cons.timeoutID)
     cons.timeoutID = setTimeout(function(){
       producer.removeListener('time', cons.timeHandler);
-      console.log('someone left');
-      console.log(producer.listeners('time'));
+      //console.log('someone left');
+      //console.log(producer.listeners('time'));
     }, 10000)
   }
-
-  
 }
 
 
@@ -55,7 +50,7 @@ function consumer(n) {
   }
 
   this.timeHandler = function(date){
-    console.log(n + ": " + date);
+    console.log(process.pid + ": " + date);
   }
 
 }
@@ -83,6 +78,22 @@ function resetProcess(){
   beginProcess();
 }
 
+
+function main(){
+
+  var numCustomers = process.argv[2];
+
+  if (numCustomers == 0)
+    console.log("No customers - program exiting");
+
+  else{
+
+    var producer = new producer();
+
+
+  }
+
+}
 var producer = new producer();
 var consumer1 = new consumer(1);
 var consumer2 = new consumer(2);
@@ -97,7 +108,7 @@ consumer2.on('keepAlive', producer.keepAliveHandler);
 producer.on('time', consumer2.timeHandler);
 
 
-console.log(producer.listeners('time'));
+//console.log(producer.listeners('time'));
 
 consumer1.register();
 consumer2.register();
@@ -107,14 +118,14 @@ numIter = 1;
 iID = setInterval(function(){
   
   if (i < numIter){
-    console.log(i);
-    console.log(numIter);
-    console.log("Kept Alive");
+    //console.log(i);
+    //console.log(numIter);
+    //console.log("Kept Alive");
     consumer1.keepAlive();
   }
-  else{
-    console.log(producer.listeners('time'));
-  }
+  //else{
+    //console.log(producer.listeners('time'));
+  //}
 
   i++;
 }, 5000);
@@ -125,17 +136,10 @@ piID = setInterval(function(){
     producer.time();
   }
   else {
-    console.log("No more time listeners");
+    //console.log("No more time listeners");
     producer.removeAllListeners();
     clearInterval(piID);
     clearInterval(iID);
   }
 }, 1000);
-
-/*beginProcess();
-setTimeout(function(){
-  console.log("timer reset");
-  resetProcess();
-}, 5000);
-*/
 
