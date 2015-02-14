@@ -23,9 +23,9 @@ function Producer() {
 }
 
 
-function Consumer(k, n) {
+function Consumer(n) {
 
-  this.repeat = k;
+  this.repeat = Math.floor(Math.random()*13);
   this.ID = n;
   this.timeoutID = null;
 
@@ -44,10 +44,9 @@ function Consumer(k, n) {
 
 function createConsumer(producer){
 
-  var k = Math.floor(Math.random()*13)
   var num = customerCount;
   
-  var consumer = new Consumer(k, num);
+  var consumer = new Consumer(num);
   console.log("Consumer ID: " + consumer.ID + 
     "  Number keepAlive messages (k): " + consumer.repeat);
   consumer.on('register', producer.registerHandler);
