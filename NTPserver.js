@@ -3,7 +3,7 @@ var util = require('util');
 var childProcess = require('child_process');
 
 
-function producer() {
+function Producer() {
   
   EE.call(this);
 
@@ -34,10 +34,10 @@ function producer() {
 }
 
 
-function consumer(n) {
+function Consumer(k) {
 
   //EE.call(this);
-  this.name = n;
+  this.repeat = k;
   this.timeoutID = null;
 
   this.register = function(){
@@ -55,8 +55,8 @@ function consumer(n) {
 
 }
 
-util.inherits(producer, EE);
-util.inherits(consumer, EE);
+util.inherits(Producer, EE);
+util.inherits(Consumer, EE);
 
 var iID = null;
 var tID = null;
@@ -79,24 +79,60 @@ function resetProcess(){
 }
 
 
-function main(){
+function createConsumer(producer){
 
-  var numCustomers = process.argv[2];
+  var k = Math.floor(Math.random()*13)
 
-  if (numCustomers == 0)
-    console.log("No customers - program exiting");
+  //var consumer = new consumer(k);
+  var consumer = new Consumer(k)
+  consumer.on('register', producer.registerHandler);
+  consumer.on('keepAlive', producer.keepAliveHandler);
+  producer.on('time', consumer.timeHandler);
 
-  else{
-
-    var producer = new producer();
-
-
-  }
+  return consumer;
 
 }
-var producer = new producer();
-var consumer1 = new consumer(1);
-var consumer2 = new consumer(2);
+
+var numCustomers = process.argv[2];
+
+if (numCustomers == 0)
+  console.log("No customers - program exiting");
+
+else{
+
+  var producer = new Producer();
+
+  var consumer = createConsumer(producer);
+  consumer.register();
+
+  var i = 0;
+  var numIter = consumer.repeat;
+
+  iID = setInterval(function(){
+    if (i < numIter){
+      consumer.keepAlive();
+    }
+    i++;
+  }, 5000);
+
+  producer.time();
+  piID = setInterval(function(){
+    if (producer.listeners('time').length > 0){
+      producer.time();
+    }
+    else {
+      //console.log("No more time listeners");
+      producer.removeAllListeners();
+      clearInterval(piID);
+      clearInterval(iID);
+    }
+  }, 1000);
+}
+
+
+/*var producer = new producer();
+var consumer1 = new consumer();
+var consumer2 = new consumer();
 
 
 consumer1.on('register', producer.registerHandler);
@@ -143,3 +179,4 @@ piID = setInterval(function(){
   }
 }, 1000);
 
+*/
