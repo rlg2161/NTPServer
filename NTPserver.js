@@ -44,7 +44,7 @@ function Consumer(n) {
 
 function createConsumer(producer){
 
-  var num = customerCount;
+  var num = consumerCount;
   
   var consumer = new Consumer(num);
   console.log("Consumer ID: " + consumer.ID + 
@@ -73,11 +73,19 @@ util.inherits(Consumer, EE);
 var iID = null;
 var tID = null;
 
-var customerCount = 1;
-var numCustomers = process.argv[2];
+var consumerCount = 1;
+var numConsumers = process.argv[2];
 
-if (numCustomers == 0) {
-  console.log("No customers - program exiting");
+if (numConsumers == null){
+  console.log("usage:   NTPserver.js < # consumers > ");
+}
+
+if (numConsumers < 0){
+  console.log("please input a positive number of consumers");
+}
+
+if (numConsumers == 0) {
+  console.log("No consumers - program exiting");
 }
 
 else{
@@ -85,10 +93,10 @@ else{
   var producer = new Producer();
   var consumerIntervalArray = [];
 
-  for (var i = 0; i<numCustomers; i++){
+  for (var i = 0; i<numConsumers; i++){
     var id = createConsumer(producer);
     consumerIntervalArray.push(id);
-    customerCount++;
+    consumerCount++;
   }
    
 
