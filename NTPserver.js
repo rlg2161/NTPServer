@@ -1,6 +1,5 @@
 var EE = require('events').EventEmitter;
 var util = require('util');
-var childProcess = require('child_process');
 
 
 function Producer() {
@@ -34,10 +33,11 @@ function Producer() {
 }
 
 
-function Consumer(k) {
+function Consumer(k, n) {
 
   //EE.call(this);
   this.repeat = k;
+  this.ID = n;
   this.timeoutID = null;
 
   this.register = function(){
@@ -50,7 +50,7 @@ function Consumer(k) {
   }
 
   this.timeHandler = function(date){
-    console.log(process.pid + ": " + date);
+    console.log(n + ": " + date);
   }
 
 }
@@ -82,27 +82,16 @@ function resetProcess(){
 function createConsumer(producer){
 
   var k = Math.floor(Math.random()*13)
-
+  var num = count;
+  
   //var consumer = new consumer(k);
-  var consumer = new Consumer(k)
+  var consumer = new Consumer(k, num);
+  console.log("Consumer ID: " + consumer.ID + "  Number keepAlive messages: " + consumer.repeat);
+  //console.log(consumer.repeat);
   consumer.on('register', producer.registerHandler);
   consumer.on('keepAlive', producer.keepAliveHandler);
   producer.on('time', consumer.timeHandler);
 
-  return consumer;
-
-}
-
-var numCustomers = process.argv[2];
-
-if (numCustomers == 0)
-  console.log("No customers - program exiting");
-
-else{
-
-  var producer = new Producer();
-
-  var consumer = createConsumer(producer);
   consumer.register();
 
   var i = 0;
@@ -115,6 +104,29 @@ else{
     i++;
   }, 5000);
 
+  return iID;
+
+}
+
+var count = 1;
+var numCustomers = process.argv[2];
+
+if (numCustomers == 0)
+  console.log("No customers - program exiting");
+
+else{
+
+  var producer = new Producer();
+
+  var consumerIntervalArray = [];
+
+  for (var i = 0; i<numCustomers; i++){
+    var id = createConsumer(producer);
+    consumerIntervalArray.push(id);
+    count++;
+  }
+   
+
   producer.time();
   piID = setInterval(function(){
     if (producer.listeners('time').length > 0){
@@ -124,59 +136,10 @@ else{
       //console.log("No more time listeners");
       producer.removeAllListeners();
       clearInterval(piID);
-      clearInterval(iID);
+      for (var j = 0; j< consumerIntervalArray.length; j++){
+        clearInterval(consumerIntervalArray[j]);  
+      }
+      
     }
   }, 1000);
 }
-
-
-/*var producer = new producer();
-var consumer1 = new consumer();
-var consumer2 = new consumer();
-
-
-consumer1.on('register', producer.registerHandler);
-consumer1.on('keepAlive', producer.keepAliveHandler);
-producer.on('time', consumer1.timeHandler);
-
-consumer2.on('register', producer.registerHandler);
-consumer2.on('keepAlive', producer.keepAliveHandler);
-producer.on('time', consumer2.timeHandler);
-
-
-//console.log(producer.listeners('time'));
-
-consumer1.register();
-consumer2.register();
-
-var i = 0;
-numIter = 1;
-iID = setInterval(function(){
-  
-  if (i < numIter){
-    //console.log(i);
-    //console.log(numIter);
-    //console.log("Kept Alive");
-    consumer1.keepAlive();
-  }
-  //else{
-    //console.log(producer.listeners('time'));
-  //}
-
-  i++;
-}, 5000);
-
-producer.time();
-piID = setInterval(function(){
-  if (producer.listeners('time').length > 0){
-    producer.time();
-  }
-  else {
-    //console.log("No more time listeners");
-    producer.removeAllListeners();
-    clearInterval(piID);
-    clearInterval(iID);
-  }
-}, 1000);
-
-*/
