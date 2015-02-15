@@ -13,29 +13,40 @@ else {
   var client = dgram.createSocket('udp4');
 
   client.on('message', function(message, remote){
-    console.log(process.pid + " " + message.toString());
+    var type = message.toString().slice(0,1);
+    //console.log(type);
+    if (type == 0){
+      console.log(process.pid + " " + message.toString().slice(2,message.length));
+    }
+    else if (type == 1){
+      //console.log(message.toString());
+      client.close();
+      clearInterval(iID);
+    }
   });
 
 
   client.bind(Port);
 
-  var register = new Buffer("0 ; " + Port);
+  var register = new Buffer("0 ");
   client.send(register, 0, register.length, 10000, Host);
+  
 
-  var keepAlive = new Buffer("1 ; " + Port);
 
   var i = 0;
 
   iID = setInterval(function(){
+    
+    var keepAlive = new Buffer("1 " + iID);  
+
     if (i < k){
 
       client.send(keepAlive, 0, keepAlive.length, 10000, Host);
     }
-    else if (i == k){
-      clearInterval(iID);
-    }
     i++
   }, 5000);
+  
+
 
   
 

@@ -14,10 +14,12 @@ server.on('listening', function(){
 });
 
 server.on('message', function (message, remote){
+  
+  var type = message.toString().slice(0,1);
   console.log(remote.address + ":" + remote.port + " - " + message);
 
   var type = message.toString().slice(0,1);
-  console.log(type);
+  //console.log(type);
   // if first part of message = 0 --> register the client
     // set some sort of counter/timer to 10
   if (type == 0){
@@ -35,9 +37,9 @@ server.on('message', function (message, remote){
 server.bind(Port);
 
 iID = setInterval(function(){
-  console.log(connectionTimes);
+  //console.log(connectionTimes);
   var date = new Date();
-  var timeBuffer = new Buffer(date.toString());
+  var timeBuffer = new Buffer(0 + " " + date.toString());
   for (var i = 0; i < connections.length; i++){
     var port = connections[i].split(" ")[0];
     var address = connections[i].split(" ")[1];
@@ -45,11 +47,13 @@ iID = setInterval(function(){
     var tempTime = connectionTimes[port] - 1;
     var tempPort = connections[i];
     if (tempTime == 0){
-      console.log(connectionTimes[port]);
+      //console.log(connectionTimes[port]);
       delete connectionTimes[port];
       connections = connections.filter(function(elem){
         return elem !== tempPort;
       });
+      var closeMsgBuffer = new Buffer(1 + " time to close");
+      server.send(closeMsgBuffer, 0, closeMsgBuffer.length, port, address);
     }
     else {
       connectionTimes[port] = tempTime;
