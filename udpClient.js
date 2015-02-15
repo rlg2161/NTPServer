@@ -14,25 +14,20 @@ else {
 
   client.on('message', function(message, remote){
     var type = message.toString().slice(0,1);
-    //console.log(type);
     if (type == 0){
       console.log(process.pid + " " + message.toString().slice(2,message.length));
     }
     else if (type == 1){
-      //console.log(message.toString());
       client.close();
       clearInterval(iID);
     }
   });
-
 
   client.bind(Port);
 
   var register = new Buffer("0 ");
   client.send(register, 0, register.length, 10000, Host);
   
-
-
   var i = 0;
 
   iID = setInterval(function(){
@@ -45,14 +40,5 @@ else {
     }
     i++
   }, 5000);
-  
 
-
-  
-
-  /*for (var i = 0; i < k; i++){
-    tID = setTimeout(function(){
-      client.send(keepAlive, 0, keepAlive.length, 10000, Host);
-    }, 5000);
-  }*/
 }
