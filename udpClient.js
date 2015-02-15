@@ -1,23 +1,21 @@
-var dgram = require('dgram');
-
-if (process.argv[2] == null){
-  console.log("Usage: udpClient.js <Port #>");
-}
-
-else {
-  var Port = process.argv[2];
+  
+module.exports = function(port){
+  var dgram = require('dgram');
+  
+  var Port = port;
   var Host = '0.0.0.0';
   var k = Math.floor(Math.random()*13);
-  console.log(k);
+  console.log(k + " keepAlive's on port: " + port);
 
   var client = dgram.createSocket('udp4');
 
   client.on('message', function(message, remote){
     var type = message.toString().slice(0,1);
     if (type == 0){
-      console.log(process.pid + " " + message.toString().slice(2,message.length));
+      console.log(process.pid + " " + port + ": " + message.toString().slice(2,message.length));
     }
     else if (type == 1){
+      //console.log(message.toString());
       client.close();
       clearInterval(iID);
     }
