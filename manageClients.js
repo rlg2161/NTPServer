@@ -1,6 +1,10 @@
 var createClient = require('./udpClient.js');
 
-createClient(10001);
+for (var i = 0; i<process.argv[2]; i++){
+  createClient();  
+}
+
+
 
 
 

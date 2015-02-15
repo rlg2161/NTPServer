@@ -14,9 +14,6 @@
   });
 
   server.on('message', function (message, remote){
-    
-    var type = message.toString().slice(0,1);
-    //console.log(remote.address + ":" + remote.port + " - " + message);
 
     var type = message.toString().slice(0,1);
     //console.log(type);
@@ -38,11 +35,15 @@
 
   iID = setInterval(function(){
     //console.log(connectionTimes);
-    var date = new Date();
-    var timeBuffer = new Buffer(0 + " " + date.toString());
+    //console.log(connections);
+    console.log('*****');
     for (var i = 0; i < connections.length; i++){
+      console.log(connectionTimes);
+
+      var date = new Date();
       var port = connections[i].split(" ")[0];
       var address = connections[i].split(" ")[1];
+      var timeBuffer = new Buffer(0 + " " + port + " " + date.toString());
       server.send(timeBuffer, 0, timeBuffer.length, port, address);
       var tempTime = connectionTimes[port] - 1;
       var tempPort = connections[i];
@@ -58,6 +59,8 @@
       else {
         connectionTimes[port] = tempTime;
       }
+      console.log(connectionTimes);
+
 
 
     }    
