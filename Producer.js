@@ -4,8 +4,6 @@ var HOST = '0.0.0.0';
 
 var producer = net.createServer(function (socket){
 
-  
-  
   var deleteList = [];
   var connectionTimes = {};
   var iIDArray = []

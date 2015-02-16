@@ -1,16 +1,17 @@
 Readme for Bottlenose NTP coding project
 
-There are essentially two versions of this project. I was confused by the instructions (specifically the part which states "the goal of this exercise is to write a SINGLE program which contains a Producer and multiple Consumers"). I didn't quite understand the exercise, but wrote a program (NTPserver.js) that creates Producer and Consumer objects and has them send messages to each other. However, after emailing with Damon, I umderstood that the idea was actually to write a server and a client that run independently. As a result, I rewrote my code entirely. The previous verion of the project can be seen in commit: 5f4a3ec...
+After a few false starts, I wrote an NTP server and client utilizing TCP servers. 
 
 How it Works:
 
-  This version of the project has 3 programs, Producer.js, Consumer.js and ManageConsumers.js. I designed and implemented a set of UDP servers, one of which serves as the Producer and continuously emits time messages until killed (via Ctrl+C) and another which serves as the Cosumer and receives and logs time messages from the producer. Producer.js creates the producer server and sends out time messages 1/second to all clients that have connected to it. It also waits for keepAlive messages and disconnects any client that hasn't sent a keepAlive message in the last 10 seconds. Consumer.js creates a single instance of a consumer. This consumer has a randomly generated value between 0-12 that governs how many "keepAlive" messages it will send. ManageConsumers.js is a simple program that takes a command line argument and creates that many instances of a consumer.
+  This version of the project has 3 programs, Producer.js, Consumer.js and ManageConsumers.js. I designed and implemented this project as a set of TCP connections. The Producer maintains all connections and sends time messages to the clients - the clients simply connect, send a registration and then subsequent keepAlive messages, and print what they hear to console. ManageCustomers.js is a wrapper program to create N number of Consumers (where N is a command line arg).
 
-  The producer is very simple. It broadcasts the time to all of its receipients every second under the server is killed (w/ CTRL + C). It also maintains two lists; the first is a list of the port numbers of all of the consumers connected to it and the second is an object that stores the port number of a consumer and the remaining time that consumer will be alive as a key-value pair. In the broadcast loop, each consumer is looked up by port number and the remaining time value is decremented. If the value is > 0, the normal time message is sent to the client with a 0 appended to the beginning of the message. If the value == 0, then a message with the prefix 1 is sent to the consumer.
+  Consumer.js creates a single instance of a Consumer. This consumer has a randomly generated value between 0-12 that governs how many "keepAlive" messages it will send. Upon instantiation, the Consumer sends a registration message to the Producer. Subsequently, an interval loop is created and the Consumer sends 1 keepAlive message every five seconds for k iterations. 
 
-  Upon receiving a message, the consumer looks at the prefix. If the prefix is 0, it prints the message to console along with the port it is receiving the message on. (I interpreted this as the desired "identifier of the thread the Consumer is running in." Alternatively, if different processes were actually desired for each Consumer, a simple script could be written to fork a modified version of the manageConsumers program to generate Consumers who were actually running on different threads. At this point, their pid's would be the unique identifier.) If the prefix is 1, the consumer prints its final time stamp, closes its connection to the producer and then clears its interval timer.
+  The message from the Producer contains the date, the port the message is being sent to, and a leading 1 or a 0. 0 indicates a normal message and Consumer prints the port number and the time to console. A 1 indicates that it is the last message, so in addition to printing the date string to console, the interval timer that governs the sending of keepAlive messages is also cleared.
 
-  The consumer also sends two types of messages. When it is created, it sends a registration message - a message prefixed by a 0 to the producer. It also sends k keepAlive messages on 5 second intervals - this message is a 1 and the intervalID. When the producer receives a message with a 0, it adds that consumer to the lists it curates as described above. When it receives a message of a 1, it resets the timer on that Consumer's port number to 10 seconds. 
+  Producer.js creates a single instance of the Producer. The producer listens for connections on port 10000, address '0.0.0.0'. On receiving a registration message, it creates a connectionTimes object that contains the client's port number and a counter that governs what type of message to send to that client. For each socket, an interval loop is entered that sends a time message. The interval id is saved in an array. If it is a normal message, the message is prefixed by a 0; if it is the last message, the message is prefixed by a 1. The type of message is determined by the value in the connectionTimes object - when that counter == 1 the last message will be sent, otherwise a normal message will be sent. Additionally, if it is the last message, the producer closes the socket after sending the message. After sending a message, the counter stored in the connectionsTime object is decremented by 1. Upon receiving a close message from the client, the interval timer stored in the array is cleared and the connection is removed from the producer's connectionTime object. 
+
 
 Tests:
 
@@ -18,12 +19,16 @@ Tests:
 
 To Improve:
   
-  Keeping track of and sending "keepAlive" message is a bit hackish - should be implemented more idiomatically.
+  Keeping track of the correct number of "keepAlive" messages to send is a bit hackish - should be implemented more idiomatically (with a real for loop for example).
 
-  Program should exit after all consumers close themselves and not need the timeout timer.
-
-  Issues with large numbers of clients.
-    Because of use of UDP, occasionally a keepAlive message does not get through and client terminates prematurely. Tried to offset this by sending a second message upon failure of delivery of first keepAlive message. On the producer side, it appears that the time message is occasionally lost as well, resulting in an off by one error for all remaining consumers.
+  Works for a relatively large number of clients but meets problems when dealing with hundreds of clients. Works reliably for at least 200 customers but significantly more clients (ex: 500) do not yeild correct messages. 
 
 
 
+Note:
+ 
+  My git log history is so long (and possibly confusing) because there are essentially 3 versions of this project. Initially, I was confused by the prompt (particularly the part about writing a SINGLE program to handle both the consumer and the producer), so I wrote a single program that contained producer and consumer objects that sent the relevant messages to one another. This version can be found at commit 5f4a3ec...
+
+  After speaking with Damon, I realized I had misunderstood the assignment, so I rewrote the whole program as a UDP server application. I wrote it this way because I thought the time stamps were best thought of as datagrams. I finished this version of the application which can be found at commit 3b32a06... However, I was having problems always getting the correct number of time messages sent to each client. I believe that this problem was caused by some of the packets getting lost, which led to an incorrect number of messages being sent. This problem was exacerbated by high numbers of clients (presumably because it was simply a higher volume of messages so there was a greater likelihood one or more would be dropped). I didn't think the problems with the UDP channel would have been a significant issue with a server and a client running on the same machine, which is why I chose to use the UDP protocol. Upon realizing this problem, I made a few stabs at trying to fix this issue by re-issuing messages if they didn't go through. Not finding any immediate success, I decided to just rewrite the entire project using TCP.
+
+  The final version of this project (as described above) is the TCP version. It borrows much of its internal logic from the UDP version - it is merely an adaptation to the new protocol (with a few simplifications that come from utilizing TCP). 
