@@ -37,7 +37,13 @@ module.exports = function(){
     // sends k keep alive messages
     if (i < k){
        
-      consumer.send(keepAlive, 0, keepAlive.length, 10000, Host);
+      consumer.send(keepAlive, 0, keepAlive.length, 10000, Host, function(err, bytes){
+        if (err) {
+          // Callback added to try to deal with lost packet 
+          consumer.send(keepAlive, 0, keepAlive.length, 10000, Host);
+          console.log("second message sent");
+        }
+      });
     }
     i++
   }, 5000);

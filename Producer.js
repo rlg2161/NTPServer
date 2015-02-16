@@ -26,7 +26,7 @@
     //if the first part of message = 1 --> reset the time counter to 10
     if (type == 1){
       console.log("keepAlive " + remote.port);
-      connectionTimes[remote.port] = 10;
+      connectionTimes[remote.port] = connectionTimes[remote.port] + 5;
     }
 
   });
@@ -86,22 +86,6 @@
       console.log(connections);
       console.log(connectionTimes);
 
-
-
-
-      /*console.log("J: " + j);
-      console.log("Delete List: " + deleteList);
-      console.log("Delete Item: " + deleteList[j]);
-      console.log("Connections: " + connections);
-      var del = connections.indexOf(deleteList[j]);
-      console.log("DeleteList index: " + del);
-      console.log("ConnectionTimes: " + connectionTimes.toString());
-      console.log("Connection to delete: " + connections[deleteList[j]]);
-      delete connectionTimes[deleteList[j].slice(0,5)];
-      //delete connections[del];
-      console.log(connections);
-      console.log(connectionTimes);
-      */
     }    
   }, 1000);
 

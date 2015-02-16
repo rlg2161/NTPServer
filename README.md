@@ -22,7 +22,8 @@ To Improve:
 
   Program should exit after all consumers close themselves and not need the timeout timer.
 
-  Program doesn't work with large numbers of client nodes. Additionally, there is an occasional off-by-one bug that I cannot replicate reliably or identify.
+  Issues with large numbers of clients.
+    Because of use of UDP, occasionally a keepAlive message does not get through and client terminates prematurely. Tried to offset this by sending a second message upon failure of delivery of first keepAlive message. On the producer side, it appears that the time message is occasionally lost as well, resulting in an off by one error for all remaining consumers.
 
 
 
