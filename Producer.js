@@ -36,8 +36,11 @@
   iID = setInterval(function(){
     //console.log(connectionTimes);
     //console.log(connections);
-    console.log('*****');
+    //console.log('*****');
+    var deleteList = [];
     for (var i = 0; i < connections.length; i++){
+      
+
       console.log(connectionTimes);
 
       var date = new Date();
@@ -48,20 +51,24 @@
       var tempTime = connectionTimes[port] - 1;
       var tempPort = connections[i];
       if (tempTime == 0){
-        //console.log(connectionTimes[port]);
-        delete connectionTimes[port];
-        connections = connections.filter(function(elem){
-          return elem !== tempPort;
-        });
-        var closeMsgBuffer = new Buffer(1 + " time to close");
-        server.send(closeMsgBuffer, 0, closeMsgBuffer.length, port, address);
+        console.log("Connection to delete: " + connectionTimes[port]);
+        deleteList.push(connections[i]);
+        
+        timeBuffer = new Buffer(1 + port + " " + date.toString());
+        server.send(timeBuffer, 0, timeBuffer.length, port, address);
       }
       else {
         connectionTimes[port] = tempTime;
       }
-      console.log(connectionTimes);
+    }
 
+    for (var j = 0; j<deleteList.length; j++){
+      delete connectionTimes[port];
+      connections = connections.filter(function(elem){
+        return elem !== tempPort;
+    });
 
+    console.log(connectionTimes);
 
     }    
   }, 1000);

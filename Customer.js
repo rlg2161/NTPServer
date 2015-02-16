@@ -17,9 +17,10 @@ module.exports = function(){
       console.log(message.toString().slice(2,message.length));
     }
     else if (type == 1){
-      //console.log(message.toString());
-      client.close();
+      //console.log(message.toString().slice(2, message.length));
       clearInterval(iID);
+      client.close();
+      
     }
   });
 
