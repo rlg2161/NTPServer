@@ -6,6 +6,7 @@
 
   var server = dgram.createSocket('udp4');
   var connections = [];
+  var deleteList = [];
   var connectionTimes = {};
 
   server.on('listening', function(){
@@ -36,39 +37,51 @@
   iID = setInterval(function(){
     //console.log(connectionTimes);
     //console.log(connections);
-    //console.log('*****');
-    var deleteList = [];
+    
+    deleteList.length = 0;
+  
     for (var i = 0; i < connections.length; i++){
-      
+      //console.log("i: " + i);
+      //console.log(connectionTimes);
 
-      console.log(connectionTimes);
-
+      //Send message
       var date = new Date();
       var port = connections[i].split(" ")[0];
       var address = connections[i].split(" ")[1];
       var timeBuffer = new Buffer(0 + " " + port + " " + date.toString());
-      server.send(timeBuffer, 0, timeBuffer.length, port, address);
+      
+
+      //Find port and decrement timer
       var tempTime = connectionTimes[port] - 1;
       var tempPort = connections[i];
+
+      //Send last time message if time == 0
       if (tempTime == 0){
-        console.log("Connection to delete: " + connectionTimes[port]);
+        //console.log("Connection to delete: " + connections[i]);
         deleteList.push(connections[i]);
         
-        timeBuffer = new Buffer(1 + port + " " + date.toString());
+        timeBuffer = new Buffer(1 + " " + port + " " + date.toString());
         server.send(timeBuffer, 0, timeBuffer.length, port, address);
       }
+      // Send normal time message and decrememtt timer
       else {
+        server.send(timeBuffer, 0, timeBuffer.length, port, address);
         connectionTimes[port] = tempTime;
       }
     }
 
     for (var j = 0; j<deleteList.length; j++){
-      delete connectionTimes[port];
-      connections = connections.filter(function(elem){
-        return elem !== tempPort;
-    });
-
-    console.log(connectionTimes);
+      //console.log("J: " + j);
+      //console.log("Delete List: " + deleteList);
+      //console.log("Delete Item: " + deleteList[j]);
+      //console.log("Connections: " + connections);
+      var del = connections.indexOf(deleteList[j]);
+      //console.log("DeleteList index: " + del);
+      //console.log("ConnectionTimes: " + connectionTimes.toString());
+      //console.log("Connection to delete: " + connections[deleteList[j]]);
+      delete connectionTimes[deleteList[j].slice(0,5)];
+      delete connections[deleteList[j]];
+      console.log(connectionTimes);
 
     }    
   }, 1000);

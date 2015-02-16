@@ -3,7 +3,7 @@ module.exports = function(){
   var dgram = require('dgram');
   
   var Host = '0.0.0.0';
-  var k = 2;//Math.floor(Math.random()*13);
+  var k = Math.floor(Math.random()*5);
   console.log(k + " keepAlive's");
 
   var client = dgram.createSocket('udp4');
@@ -17,7 +17,7 @@ module.exports = function(){
       console.log(message.toString().slice(2,message.length));
     }
     else if (type == 1){
-      //console.log(message.toString().slice(2, message.length));
+      console.log(message.toString().slice(0, message.length));
       clearInterval(iID);
       client.close();
       
