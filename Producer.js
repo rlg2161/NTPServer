@@ -1,91 +1,69 @@
 
-  var dgram = require('dgram');
-  var Port = 10000;
-  var Host = '0.0.0.0';
-  var server = dgram.createSocket('udp4');
-  var connections = [];
+var producer = net.createServer(function (socket){
+
+  var net = require('net');
+
+  var PORT = 10000;
+  var HOST = '0.0.0.0';
+
   var deleteList = [];
   var connectionTimes = {};
+  var iIDArray = []
 
-  server.on('listening', function(){
-    var address = server.address();
-    console.log('UDP Server listening on ' + address.address + ':' + address.port);
-  });
 
-  server.on('message', function (message, remote){
-
-    var type = message.toString().slice(0,1);
-    //console.log(type);
-    // if first part of message = 0 --> register the client
-      // set some sort of counter/timer to 10
+  // Handle incoming messages
+  socket.on('data', function(data){
+    var type = data.toString().slice(0,1);
     if (type == 0){
-      connections.push(remote.port + " " + remote.address);
-      connectionTimes[remote.port] = 10;
+      //Registration message
+      console.log(socket.remoteAddress + ":" + socket.remotePort + " registered");
+      connectionTimes[socket.remotePort] = 10;
+      console.log(connectionTimes);
     }
-
-    //if the first part of message = 1 --> reset the time counter to 10
-    if (type == 1){
-      console.log("keepAlive " + remote.port);
-      connectionTimes[remote.port] = connectionTimes[remote.port] + 5;
+    else if (type == 1){
+      //Keep Alive message
+      console.log("keepAlive " + socket.remotePort);
+      connectionTimes[socket.remotePort] = connectionTimes[socket.remotePort] + 5;
     }
 
   });
 
-  server.bind(Port);
+  // Handle consumer closing
+  socket.on('close', function(data) {
+    console.log("Consumer exited");
+    clearInterval(iIDArray[0]);
+    delete connectionTimes[deleteList[0]];
 
+  })
+
+  // Manage time stamp sending
   iID = setInterval(function(){
-    console.log(connectionTimes);
-    //console.log(connections);
+    var date = new Date();
+    var tempTime = connectionTimes[socket.remotePort] - 1;
     
-    deleteList.length = 0;
-    /*var date = new Date();
-    var port = connections[i].split(" ")[0];
-    var address = connections[i].split(" ")[1];*/
-
-    for (var i = 0; i < connections.length; i++){
-      //console.log("i: " + i);
-      //console.log(connectionTimes);
-
-      //Send message
-      var date = new Date();
-      var port = connections[i].split(" ")[0];
-      var address = connections[i].split(" ")[1];
-      var timeBuffer = new Buffer(0 + " " + port + " " + date.toString());
-      
-      //Find port and decrement timer
-      var tempTime = connectionTimes[port] - 1;
-      var tempPort = connections[i];
-
-      //Send last time message if time == 0
-      if (tempTime == 0){
-        console.log("Connection to delete: " + tempPort);
-        deleteList.push(tempPort);
-        
-        timeBuffer = new Buffer(1 + " " + port + " " + date.toString());
-        server.send(timeBuffer, 0, timeBuffer.length, port, address);
-      }
-      // Send normal time message and decrememtt timer
-      else {
-        server.send(timeBuffer, 0, timeBuffer.length, port, address);
-        connectionTimes[port] = tempTime;
-      }
+    if (tempTime == 0){
+      // If time remaining on connection == 0; send last message and terminate connection
+      console.log("Connection to delete: " + socket.remotePort);
+      timeString = '1' + date.toString();
+      socket.write(timeString);
+      deleteList.push(socket.remotePort);
+      socket.end();
     }
+    
+    else {
+      // Else, send normal time message
+      var timeString = '0' + date.toString();
+      socket.write(timeString);
+    }
+    
+    //Decrement time counter
+    connectionTimes[socket.remotePort] = tempTime;
 
-    for (var j = 0; j<deleteList.length; j++){
-      console.log("J: " + j);
-      console.log("Delete List: " + deleteList);
-      console.log("Delete Item: " + deleteList[j]);
-
-      var portString = deleteList[j].slice(0,5);
-      var portIndex = connections.indexOf(deleteList[j]);
-      console.log(portIndex);
-      console.log(connections);
-      delete connectionTimes[portString];
-      connections.splice(portIndex, 1);
-
-      console.log(connections);
-      console.log(connectionTimes);
-
-    }    
   }, 1000);
+  iIDArray.push(iID);
 
+});
+
+producer.listen(PORT, HOST, function() {
+  console.log('server bound to ' + HOST + ":" + PORT);
+});

@@ -1,51 +1,49 @@
-  
+
 module.exports = function(){
-  var dgram = require('dgram');
-  
-  var Host = '0.0.0.0';
+  var net = require('net');
+
+  var serverAddress = '0.0.0.0';
+  var serverPort = 10000;
   // Gen k value
-  var k = Math.floor(Math.random()*13);
+  var k = Math.floor(Math.random()*5);
+  var iIDArray = []
   console.log(k + " keepAlive's");
 
-  var consumer = dgram.createSocket('udp4');
+  var consumer = net.createConnection(serverPort, serverAddress, function(){
+    
+    consumer.on('data', function(data){
+      var type = data.toString().slice(0,1);
+      //console.log(type);
+      
+      if (type == 0) {
+        console.log(data.toString().slice(1, data.length));
+      }
 
-  consumer.on('message', function(message, remote){
-    // Log time message --> which if statement depends on 1st char of message
-    var type = message.toString().slice(0,1);
-    if (type == 0) {
-      console.log(message.toString().slice(0,message.length));
-    }
-    else if (type == 1){
-      //Log last message and clear interval and consumer 
-      console.log(message.toString().slice(0, message.length));
-      clearInterval(iID);
-      consumer.close();      
-    }
+      else if (type == 1) {
+        console.log(data.toString().slice(1, data.length));
+        clearInterval(iIDArray[0]);
+        //consumer.destroy();
+      }
+    });
+    
   });
 
-  // Create and send first message to server
-  var register = new Buffer("0 ");
-  // Since not previously bound, gets assigned a random port number. This port number is the 
-  // "thread id" described in problem
-  consumer.send(register, 0, register.length, 10000, Host);
-  
+  // Sends initial registration message
+  var register = '0'
+  consumer.write(register);
+
   //Manage sending of keep alive messages
   var i = 0;
   iID = setInterval(function(){
     
-    var keepAlive = new Buffer("1 ");  
+    var keepAlive = '1';  
     // sends k keep alive messages
     if (i < k){
-       
-      consumer.send(keepAlive, 0, keepAlive.length, 10000, Host, function(err, bytes){
-        if (err) {
-          // Callback added to try to deal with lost packet 
-          consumer.send(keepAlive, 0, keepAlive.length, 10000, Host);
-          console.log("second message sent");
-        }
-      });
+      console.log("keepAlive sent") 
+      consumer.write(keepAlive);
     }
     i++
   }, 5000);
-
+  iIDArray.push(iID);
 }
+  

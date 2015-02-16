@@ -13,9 +13,9 @@ else {
   for (var i = 0; i<process.argv[2]; i++){
     createConsumer();  
   }
-  setTimeout(function(){
-    process.exit();
-  }, 71000);
+  //setTimeout(function(){
+    //process.exit();
+  //}, 71000);
 }
 
 
