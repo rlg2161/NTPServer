@@ -1,12 +1,12 @@
-/* Correct output test. To run, redirect output of ManageCustomers.js to 'test.txt' and 
-then call test.js <# number customers> */
+/* Correct output test. To run, redirect output of ManageConsumers.js to 'test.txt' and 
+then call test.js <# number consumers> */
 
 var fs = require('fs');
 
-var numCustomers = parseInt(process.argv[2]);
+var numConsumers = parseInt(process.argv[2]);
 
-if (isNaN(numCustomers)){
-  console.log("Usage: test.js <# customers>");
+if (isNaN(numConsumers)){
+  console.log("Usage: test.js <# consumers>");
 }
 
 else{
@@ -20,18 +20,18 @@ else{
       var counterObj = {};
       var kList = [];
 
-      //Get k values and port numbers for customers
-      for (var i = 0; i < numCustomers; i++){
+      //Get k values and port numbers for consumers
+      for (var i = 0; i < numConsumers; i++){
         var k = splitFileString[i].split(" ")[0]; // k values
         var kVal = parseInt(k);
         kList.push(kVal);
-        var temp = splitFileString[numCustomers + i]; // port values
-        counterObj[temp.slice(0,5)] = 0;
+        var temp = splitFileString[numConsumers + i]; // port values
+        counterObj[temp.slice(2,7)] = 0;
       }
       
       // Count messages for each port number
-      for (var i = numCustomers; i < splitFileString.length; i++){
-        var temp = splitFileString[i].slice(0,5);
+      for (var i = numConsumers; i < splitFileString.length; i++){
+        var temp = splitFileString[i].slice(2,7);
         counterObj[temp] = counterObj[temp] + 1;
       }
     
@@ -44,13 +44,16 @@ else{
       kList.sort(compareNumbers);
       counterArray.sort();
 
+      //console.log(kList);
+      //console.log(counterArray);
+
       // Compare expected and actual numbers of messages per K value
       var outString = "All values correct.";
       for (var i = 0; i < kList.length; i++){
         var kVal = kList[i];
         var secs = counterArray[i];
 
-        if (secs == (10 + 5*kVal)){
+        if (secs == (10 + 5*kVal)) {
           console.log("kVal " + kVal + " --> " + secs  + " secs");
         }
         else{
