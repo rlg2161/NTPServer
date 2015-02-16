@@ -14,7 +14,6 @@ var producer = net.createServer(function (socket){
     var type = data.toString().slice(0,1);
     if (type == 0){
       //Registration message
-      console.log(socket.remoteAddress + ":" + socket.remotePort + " registered");
       connectionTimes[socket.remotePort] = 10;
     }
     else if (type == 1){
@@ -26,7 +25,6 @@ var producer = net.createServer(function (socket){
 
   // Handle consumer closing
   socket.on('close', function(data){
-    console.log(deleteList[0] + " exited");
     clearInterval(iIDArray[0]);
     delete connectionTimes[deleteList[0]];
 
