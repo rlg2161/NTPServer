@@ -3,24 +3,21 @@ module.exports = function(){
   var dgram = require('dgram');
   
   var Host = '0.0.0.0';
-  var k = Math.floor(Math.random()*5);
+  var k = Math.floor(Math.random()*13);
   console.log(k + " keepAlive's");
 
   var client = dgram.createSocket('udp4');
 
   client.on('message', function(message, remote){
+    // Log time message
     var type = message.toString().slice(0,1);
     if (type == 0){
-      //var splitMsg = message.split(" ");
-      //console.log(message.toString());
-      //console.log(remote.toString());
       console.log(message.toString().slice(2,message.length));
     }
     else if (type == 1){
-      console.log(message.toString().slice(0, message.length));
+      console.log(message.toString().slice(2, message.length));
       clearInterval(iID);
-      client.close();
-      
+      client.close();      
     }
   });
 
