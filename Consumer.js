@@ -7,6 +7,7 @@ module.exports = function(){
   // Gen k value
   var k = Math.floor(Math.random()*13);
   var iIDArray = []
+
   console.log(k + " keepAlive's");
 
   var consumer = net.createConnection(serverPort, serverAddress, function(){
@@ -15,14 +16,13 @@ module.exports = function(){
       var type = data.toString().slice(0,1);
       //console.log(type);
       
-      if (type == 0) {
+      if (type == 0){
         console.log(data.toString().slice(1, data.length));
       }
 
-      else if (type == 1) {
+      else if (type == 1){
         console.log(data.toString().slice(1, data.length));
         clearInterval(iIDArray[0]);
-        //consumer.destroy();
       }
     });
     

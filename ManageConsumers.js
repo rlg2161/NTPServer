@@ -7,7 +7,7 @@ if (isNaN(numConsumers)){
   console.log("Usage: ManageConsumers.js <# customers>");
 }
 
-else {
+else{
   // Create n number of customers
   for (var i = 0; i<process.argv[2]; i++){
     createConsumer();  

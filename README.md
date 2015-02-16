@@ -2,6 +2,18 @@ Readme for Bottlenose NTP coding project
 
 After a few false starts, I wrote an NTP server and client utilizing TCP servers. 
 
+To run:
+
+  In one process:
+    nodejs Producer.js
+
+  In another process:
+    nodejs ManageConsumers.js X
+
+  To test correct output:
+    nodejs ManageCustomers.js X > test.txt
+    nodejs test.js X
+
 How it Works:
 
   This version of the project has 3 programs, Producer.js, Consumer.js and ManageConsumers.js. I designed and implemented this project as a set of TCP connections. The Producer maintains all connections and sends time messages to the clients - the clients simply connect, send a registration and then subsequent keepAlive messages, and print what they hear to console. ManageCustomers.js is a wrapper program to create N number of Consumers (where N is a command line arg).
@@ -21,13 +33,14 @@ To Improve:
   
   Keeping track of the correct number of "keepAlive" messages to send is a bit hackish - should be implemented more idiomatically (with a real for loop for example).
 
-  Works for a relatively large number of clients but meets problems when dealing with hundreds of clients. Works reliably for at least 200 customers but significantly more clients (ex: 500) do not yeild correct messages. 
+  Works for a relatively large number of clients but meets problems when dealing with hundreds of clients. Works reliably for at least 200 customers but significantly more clients (ex: 500) do not yeild correct messages.
 
+  Could fully automate testing so output doesn't have to be redirected to file which is then tested.S
 
 
 Note:
  
-  My git log history is so long (and possibly confusing) because there are essentially 3 versions of this project. Initially, I was confused by the prompt (particularly the part about writing a SINGLE program to handle both the consumer and the producer), so I wrote a single program that contained producer and consumer objects that sent the relevant messages to one another. This version can be found at commit 5f4a3ec...
+  My git log history is so long (and probably confusing) because there are essentially 3 versions of this project. Initially, I was confused by the prompt (particularly the part about writing a SINGLE program to handle both the consumer and the producer), so I wrote a single program that contained producer and consumer objects that sent the relevant messages to one another. This version can be found at commit 5f4a3ec...
 
   After speaking with Damon, I realized I had misunderstood the assignment, so I rewrote the whole program as a UDP server application. I wrote it this way because I thought the time stamps were best thought of as datagrams. I finished this version of the application which can be found at commit 3b32a06... However, I was having problems always getting the correct number of time messages sent to each client. I believe that this problem was caused by some of the packets getting lost, which led to an incorrect number of messages being sent. This problem was exacerbated by high numbers of clients (presumably because it was simply a higher volume of messages so there was a greater likelihood one or more would be dropped). I didn't think the problems with the UDP channel would have been a significant issue with a server and a client running on the same machine, which is why I chose to use the UDP protocol. Upon realizing this problem, I made a few stabs at trying to fix this issue by re-issuing messages if they didn't go through. Not finding any immediate success, I decided to just rewrite the entire project using TCP.
 

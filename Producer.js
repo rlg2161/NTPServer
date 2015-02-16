@@ -25,7 +25,7 @@ var producer = net.createServer(function (socket){
   });
 
   // Handle consumer closing
-  socket.on('close', function(data) {
+  socket.on('close', function(data){
     console.log(deleteList[0] + " exited");
     clearInterval(iIDArray[0]);
     delete connectionTimes[deleteList[0]];
@@ -45,7 +45,7 @@ var producer = net.createServer(function (socket){
       socket.end();
     }
     
-    else {
+    else{
       // Else, send normal time message
       var timeString = '0' + socket.remotePort + " " + date.toString();
       socket.write(timeString);
@@ -59,6 +59,6 @@ var producer = net.createServer(function (socket){
 
 });
 
-producer.listen(PORT, HOST, function() {
+producer.listen(PORT, HOST, function(){
   console.log('server bound to ' + HOST + ":" + PORT);
 });
