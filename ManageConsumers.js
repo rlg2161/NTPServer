@@ -8,14 +8,10 @@ if (isNaN(numConsumers)){
 }
 
 else {
-  // Create n number of customers and exit program 
-  // after max running time (70 secs + 1 sec extra)
+  // Create n number of customers
   for (var i = 0; i<process.argv[2]; i++){
     createConsumer();  
   }
-  //setTimeout(function(){
-    //process.exit();
-  //}, 71000);
 }
 
 

@@ -1,11 +1,11 @@
+var net = require('net');
+var PORT = 10000;
+var HOST = '0.0.0.0';
 
 var producer = net.createServer(function (socket){
 
-  var net = require('net');
-
-  var PORT = 10000;
-  var HOST = '0.0.0.0';
-
+  
+  
   var deleteList = [];
   var connectionTimes = {};
   var iIDArray = []
@@ -18,11 +18,9 @@ var producer = net.createServer(function (socket){
       //Registration message
       console.log(socket.remoteAddress + ":" + socket.remotePort + " registered");
       connectionTimes[socket.remotePort] = 10;
-      console.log(connectionTimes);
     }
     else if (type == 1){
       //Keep Alive message
-      console.log("keepAlive " + socket.remotePort);
       connectionTimes[socket.remotePort] = connectionTimes[socket.remotePort] + 5;
     }
 
@@ -30,7 +28,7 @@ var producer = net.createServer(function (socket){
 
   // Handle consumer closing
   socket.on('close', function(data) {
-    console.log("Consumer exited");
+    console.log(deleteList[0] + " exited");
     clearInterval(iIDArray[0]);
     delete connectionTimes[deleteList[0]];
 
@@ -43,8 +41,7 @@ var producer = net.createServer(function (socket){
     
     if (tempTime == 0){
       // If time remaining on connection == 0; send last message and terminate connection
-      console.log("Connection to delete: " + socket.remotePort);
-      timeString = '1' + date.toString();
+      timeString = '1' + socket.remotePort + " " + date.toString();
       socket.write(timeString);
       deleteList.push(socket.remotePort);
       socket.end();
@@ -52,7 +49,7 @@ var producer = net.createServer(function (socket){
     
     else {
       // Else, send normal time message
-      var timeString = '0' + date.toString();
+      var timeString = '0' + socket.remotePort + " " + date.toString();
       socket.write(timeString);
     }
     

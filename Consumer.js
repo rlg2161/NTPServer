@@ -5,7 +5,7 @@ module.exports = function(){
   var serverAddress = '0.0.0.0';
   var serverPort = 10000;
   // Gen k value
-  var k = Math.floor(Math.random()*5);
+  var k = Math.floor(Math.random()*13);
   var iIDArray = []
   console.log(k + " keepAlive's");
 
@@ -39,7 +39,7 @@ module.exports = function(){
     var keepAlive = '1';  
     // sends k keep alive messages
     if (i < k){
-      console.log("keepAlive sent") 
+      //console.log("keepAlive sent") 
       consumer.write(keepAlive);
     }
     i++
